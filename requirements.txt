@@ -1,8 +1,5 @@
-install python 3.9
-install ubuntu enabling wsl
-set up git ssh key
-install conda
-matplotlib
-
+matplotlib==3.5.1
+scikit-learn==1.0.2
+scikit-image==0.19.2
 
 
