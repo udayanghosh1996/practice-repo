@@ -13,6 +13,7 @@ hand-written digits, from 0-9.
 
 # Standard scientific Python imports
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Import datasets, classifiers and performance metrics
 from sklearn import datasets, svm, metrics
@@ -60,31 +61,52 @@ n_samples = len(digits.images)
 data = digits.images.reshape((n_samples, -1))
 
 # model hyperparams
-GAMMA = 0.001
-C = 0.5
-
+GAMMA = [0.001,0.002,0.003,0.004,0.005]
+C = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
 # Create a classifier: a support vector classifier
 clf = svm.SVC()
 
-#PART: setting up hyperparameter
-hyper_params = {'gamma':GAMMA, 'C':C}
-clf.set_params(**hyper_params)
 
-# Split data into 50% train and 50% test subsets
+# Split data into 80% train and 10% test subsets
 X_train, X_test, y_train, y_test = train_test_split(
-    data, digits.target, test_size=0.5, shuffle=False
+    data, digits.target, test_size=0.2, shuffle=True
 )
 
+# Split data into 80% train and 10% validation subset
+x_train, x_val, Y_train, Y_val = train_test_split(X_train, y_train, test_size=0.2, shuffle=True)
+gamma_=[]
+c_=[]
+accuracy=[]
+
+for Gamma in GAMMA:
+    for c in C:
+
+#PART: setting up hyperparameter
+        hyper_params = {'gamma':Gamma, 'C':c}
+        clf.set_params(**hyper_params)
+
+
 # Learn the digits on the train subset
-clf.fit(X_train, y_train)
+        clf.fit(x_train, Y_train)
 
 # Predict the value of the digit on the test subset
-predicted = clf.predict(X_test)
+        prediction = clf.predict(x_val)
+        print(f"Classification report for classifier {clf}:\n"f"{metrics.classification_report(Y_val, prediction)}\n")
+        accuracy.append(metrics.accuracy_score(Y_val,prediction))
+        gamma_.append(Gamma)
+        c_.append(c)
+gamma_=np.array(gamma_)
+c_=np.array(c_)
+accuracy=np.array(accuracy)
+i= accuracy.argmax()
+print("Best accuracy we can find with parameters\n", "Gamma=",gamma_[i], "C=", c_[i] )
+print("Accuracy list\n", accuracy)
+
 
 ###############################################################################
 # Below we visualize the first 4 test samples and show their predicted
 # digit value in the title.
-
+'''
 _, axes = plt.subplots(nrows=1, ncols=4, figsize=(10, 3))
 for ax, image, prediction in zip(axes, X_test, predicted):
     ax.set_axis_off()
@@ -110,3 +132,4 @@ disp.figure_.suptitle("Confusion Matrix")
 print(f"Confusion matrix:\n{disp.confusion_matrix}")
 
 plt.show()
+'''
