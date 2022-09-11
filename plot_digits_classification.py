@@ -59,8 +59,16 @@ for ax, image, label in zip(axes, digits.images, digits.target):
 n_samples = len(digits.images)
 data = digits.images.reshape((n_samples, -1))
 
+# model hyperparams
+GAMMA = 0.001
+C = 0.5
+
 # Create a classifier: a support vector classifier
-clf = svm.SVC(gamma=0.001)
+clf = svm.SVC()
+
+#PART: setting up hyperparameter
+hyper_params = {'gamma':GAMMA, 'C':C}
+clf.set_params(**hyper_params)
 
 # Split data into 50% train and 50% test subsets
 X_train, X_test, y_train, y_test = train_test_split(
