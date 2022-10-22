@@ -19,6 +19,8 @@ from utils import (
     random_split_generator,
     h_param_tuning_dect,
     get_accuracy,
+    get_mean,
+    get_std,
 )
 from joblib import dump, load
 
@@ -30,17 +32,12 @@ train_fracs, dev_fracs, test_fracs = random_split_generator(n)
 #print(train_frac,'\n', dev_frac, '\n', test_frac)
 
 # set the hyper parameters SVM
-GAMMA = [0.01, 0.005, 0.001, 0.0005, 0.0001]
-C = [0.1, 0.2, 0.5, 0.7, 1, 2, 5, 7, 10]
+GAMMA = [0.0001, 0.0004, 0.0005, 0.0008, 0.001]
+C = [0.5, 2.0, 3.0, 4.0, 5.0]
 
 # 2. set hyper parameters for decision tree classifier
 Criterion = ['gini', 'entropy']
 Splitter = ['best', 'random']
-
-# Creating hyperparameters combination for SVM
-h_param_comb_svm = pdt(GAMMA,C)
-# Creating hyperparameter Combination for Decision Tree Classifier
-h_param_comb_dect = pdt(Criterion, Splitter)
 
 
 # Loading dataset
@@ -59,6 +56,11 @@ best_prediction_accuracy_dect = []
 
 
 for i in range(0, n):
+    # Creating hyperparameters combination for SVM
+    h_param_comb_svm = pdt(GAMMA,C)
+    # Creating hyperparameter Combination for Decision Tree Classifier
+    h_param_comb_dect = pdt(Criterion, Splitter)
+    
 
     x_train, y_train, x_dev, y_dev, x_test, y_test = train_dev_test_split(
         data, label, train_fracs[i], dev_fracs[i]
@@ -68,6 +70,7 @@ for i in range(0, n):
     # getting best model for SVM
     best_model_svm, best_metric_svm, best_h_params_svm = h_param_tuning_svm(
         h_param_comb_svm, clf_svm, x_train, y_train, x_dev, y_dev)
+    
 
     # save the best_model for SVM 
     best_param_config_svm = "_".join([param + "=" + str(best_h_params_svm[param]) for param in best_h_params_svm])
@@ -125,3 +128,14 @@ for i in range(0, n):
     best_prediction_accuracy_dect.append(predict_accuracy_dect)
 print("accuracy list svm: ", best_prediction_accuracy_svm)
 print("accuracy list decision tree: ", best_prediction_accuracy_dect)
+print('\n\n')
+
+# calculating mean and standard deviation of accuracy for svm and decision tree classifier
+svm_accuracy_mean = get_mean(best_prediction_accuracy_svm)
+svm_accuracy_std = get_std(best_prediction_accuracy_svm)
+dect_accuracy_mean = get_mean(best_prediction_accuracy_dect)
+dect_accuracy_std = get_std(best_prediction_accuracy_dect)
+
+print("Mean accuracy for SVM: ", svm_accuracy_mean, '\nStandard deviation for accuarcy for SVM', svm_accuracy_std)
+print("Mean accuracy for Decision Tree Classifier: ", dect_accuracy_mean, '\nStandard deviation for accuarcy for Decision Tree Classifier', dect_accuracy_std)
+

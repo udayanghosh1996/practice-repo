@@ -87,7 +87,6 @@ def h_param_tuning_svm(h_param_comb, clf, x_train, y_train, x_dev, y_dev):
         # Learn the digits on the train subset
         clf.fit(x_train, y_train)
 
-        # print(cur_h_params)
         # PART: get dev set predictions
         dev_prediction = clf.predict(x_dev)
 
@@ -142,3 +141,11 @@ def h_param_tuning_dect(h_param_comb, clf, x_train, y_train, x_dev, y_dev):
 def get_accuracy(y_test, predicted):
     accuracy = metric(y_test, predicted)
     return accuracy
+
+
+def get_mean(arr):
+    _mean = np.mean(np.array(arr))
+    return _mean
+def get_std(arr):
+    _std = np.std(np.array(arr))
+    return _std
