@@ -5,72 +5,123 @@
 # PART: library dependencies -- sklear, torch, tensorflow, numpy, transformers
 
 # Import datasets, classifiers and performance metrics
-from sklearn import datasets, svm, metrics
+from poplib import CR
+from sklearn import datasets, svm, metrics, tree
+from itertools import product as pdt
 
 from utils import (
+    get_accuracy,
     preprocess_digits,
     train_dev_test_split,
-    h_param_tuning,
-    data_viz,
-    pred_image_viz,
+    h_param_tuning_svm,
+    #data_viz,
+    #pred_image_viz,
+    random_split_generator,
+    h_param_tuning_dect,
+    get_accuracy,
 )
 from joblib import dump, load
 
 
-train_frac, dev_frac, test_frac = 0.8, 0.1, 0.1
-assert train_frac + dev_frac + test_frac == 1.0
+n = int(input("Enter the number of sets of train, dev, test split : "))
 
-# 1. set the ranges of hyper parameters
-gamma_list = [0.01, 0.005, 0.001, 0.0005, 0.0001]
-c_list = [0.1, 0.2, 0.5, 0.7, 1, 2, 5, 7, 10]
 
-h_param_comb = [{"gamma": g, "C": c} for g in gamma_list for c in c_list]
+train_fracs, dev_fracs, test_fracs = random_split_generator(n)
+#print(train_frac,'\n', dev_frac, '\n', test_frac)
 
-assert len(h_param_comb) == len(gamma_list) * len(c_list)
+# set the hyper parameters SVM
+GAMMA = [0.01, 0.005, 0.001, 0.0005, 0.0001]
+C = [0.1, 0.2, 0.5, 0.7, 1, 2, 5, 7, 10]
 
-# PART: load dataset -- data from csv, tsv, jsonl, pickle
+# 2. set hyper parameters for decision tree classifier
+Criterion = ['gini', 'entropy']
+Splitter = ['best', 'random']
+
+# Creating hyperparameters combination for SVM
+h_param_comb_svm = pdt(GAMMA,C)
+# Creating hyperparameter Combination for Decision Tree Classifier
+h_param_comb_dect = pdt(Criterion, Splitter)
+
+
+# Loading dataset
 digits = datasets.load_digits()
-data_viz(digits)
+#data_viz(digits)
 data, label = preprocess_digits(digits)
-# housekeeping
-del digits
+
+# Create a svm classifier
+clf_svm = svm.SVC()
+
+# create a decision tree classifier
+clf_dect = tree.DecisionTreeClassifier()
+
+best_prediction_accuracy_svm =[]
+best_prediction_accuracy_dect = []
 
 
-x_train, y_train, x_dev, y_dev, x_test, y_test = train_dev_test_split(
-    data, label, train_frac, dev_frac
-)
+for i in range(0, n):
 
-# PART: Define the model
-# Create a classifier: a support vector classifier
-clf = svm.SVC()
-# define the evaluation metric
-metric = metrics.accuracy_score
+    x_train, y_train, x_dev, y_dev, x_test, y_test = train_dev_test_split(
+        data, label, train_fracs[i], dev_fracs[i]
+    )
 
 
-best_model, best_metric, best_h_params = h_param_tuning(
-    h_param_comb, clf, x_train, y_train, x_dev, y_dev, metric
-)
+    # getting best model for SVM
+    best_model_svm, best_metric_svm, best_h_params_svm = h_param_tuning_svm(
+        h_param_comb_svm, clf_svm, x_train, y_train, x_dev, y_dev)
 
-# save the best_model
-best_param_config = "_".join([h + "=" + str(best_h_params[h]) for h in best_h_params])
-dump(best_model, "svm_" + best_param_config + ".joblib")
+    # save the best_model for SVM 
+    best_param_config_svm = "_".join([param + "=" + str(best_h_params_svm[param]) for param in best_h_params_svm])
+    dump(best_model_svm, "svm_" + best_param_config_svm + ".joblib")
+
+    # getting best model for Decision Tree Classifier
+    best_model_dect, best_metric_dect, best_h_params_dect = h_param_tuning_dect(
+        h_param_comb_dect, clf_dect, x_train, y_train, x_dev, y_dev)
+
+    # save the best model for Decision Tree Classifier
+    best_param_config_dect = "_".join([param + "=" + str(best_h_params_dect[param]) for param in best_h_params_dect])
+    dump(best_model_dect, "dect_" + best_param_config_dect + ".joblib")
 
 
-# 2. load the best_model
-best_model = load("svm_" + best_param_config + ".joblib")
+    # load the best_model for SVM
+    best_model_svm = load("svm_" + best_param_config_svm + ".joblib")
 
-# PART: Get test set predictions
-# Predict the value of the digit on the test subset
-predicted = best_model.predict(x_test)
+    # load the best_model for Decision Tree Classifier
+    best_model_dect = load("dect_" + best_param_config_dect + ".joblib")
 
-pred_image_viz(x_test, predicted)
+    # Predict the value of the digit on the test set for SVM Model
+    predicted_svm = best_model_svm.predict(x_test)
 
-# 4. report the test set accurancy with that best model.
-# PART: Compute evaluation metrics
-print(
-    f"Classification report for classifier {clf}:\n"
-    f"{metrics.classification_report(y_test, predicted)}\n"
-)
+    # Predict the value of the digit on the test set for Decision Tree Classifier
+    predicted_dect = best_model_dect.predict(x_test)
 
-print("Best hyperparameters were:")
-print(best_h_params)
+    #pred_image_viz(x_test, predicted_svm)
+
+    # Compute evaluation metrics for SVM
+    print(
+        f"Classification report for SVM classifier {clf_svm}:\n"
+        f"{metrics.classification_report(y_test, predicted_svm)}\n"
+    )
+
+    print("Best hyperparameters for SVM Classifier were:")
+    print(best_h_params_svm)
+    print('\n\n')
+
+    # Compute evaluation metrics for Decision Tree Classifier
+    print(
+        f"Classification report for Decision Tree classifier {clf_dect}:\n"
+        f"{metrics.classification_report(y_test, predicted_dect)}\n"
+    )
+
+    print("Best hyperparameters for Decision Tree Classifier were:")
+    print(best_h_params_svm)
+    print('\n\n\n\n')
+
+    # prediction accuracy for each train, dev, test set for svm and decision tree
+    predict_accuracy_svm = get_accuracy(y_test, predicted_svm)
+    predict_accuracy_dect = get_accuracy(y_test, predicted_dect)
+
+    # storing accuracies for future use
+    best_prediction_accuracy_svm.append(predict_accuracy_svm)
+    best_prediction_accuracy_dect.append(predict_accuracy_dect)
+print("accuracy list svm: ", best_prediction_accuracy_svm)
+print("accuracy list decision tree: ", best_prediction_accuracy_dect)
