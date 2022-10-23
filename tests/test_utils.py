@@ -1,19 +1,43 @@
 import sys
 sys.path.append('.')
 
-from utils import get_all_h_param_comb
+from utils import train_dev_test_split
+from sklearn import datasets
+from joblib import dump, load
 
-# test case to check if all the combinations of the hyper parameters are indeed getting created
-def test_get_h_param_comb():
-    gamma_list = [0.01, 0.005, 0.001, 0.0005, 0.0001]
-    c_list = [0.1, 0.2, 0.5, 0.7, 1, 2, 5, 7, 10]
 
-    params = {}
-    params['gamma'] = gamma_list
-    params['C'] = c_list
-    h_param_comb = get_all_h_param_comb(params)
+def test_get_bias():
+    digits = datasets.load_digits()
+    n_samples = len(digits.images)
+    data = digits.images.reshape((n_samples, -1))
+    label = digits.target
+    train_fracs = 0.7
+    dev_fracs = 0.1
+    x_train, y_train, x_dev, y_dev, x_test, y_test = train_dev_test_split(
+        data, label, train_fracs, dev_fracs
+    )
+    model = load("svm_gamma=0.0008_C=2.0.joblib")
+    predict = model.predict(x_test)
+    checker = predict[0]
+    flag = True
+    for item in predict:
+        if checker != item:
+            flag = False
+            break;
+    assert flag != True
+def test_predict_all_classes():
+    digits = datasets.load_digits()
+    n_samples = len(digits.images)
+    data = digits.images.reshape((n_samples, -1))
+    label = digits.target
+    model = load("svm_gamma=0.0008_C=2.0.joblib")
+    predict = model.predict(data)
+    checker = list(set(label))
+    predicted = list(set(predict))
+    assert len(checker) == len(predicted)
+    
 
-    assert len(h_param_comb) == len(gamma_list) * len(c_list)
+
 
 
 #what more test cases should be there 
