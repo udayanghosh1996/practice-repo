@@ -8,6 +8,7 @@
 from poplib import CR
 from sklearn import datasets, svm, metrics, tree
 from itertools import product as pdt
+import numpy as np
 
 from utils import (
     get_accuracy,
@@ -138,4 +139,3 @@ dect_accuracy_std = get_std(best_prediction_accuracy_dect)
 
 print("Mean accuracy for SVM: ", svm_accuracy_mean, '\nStandard deviation for accuarcy for SVM', svm_accuracy_std)
 print("Mean accuracy for Decision Tree Classifier: ", dect_accuracy_mean, '\nStandard deviation for accuarcy for Decision Tree Classifier', dect_accuracy_std)
-
