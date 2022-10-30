@@ -142,6 +142,10 @@ def get_accuracy(y_test, predicted):
     accuracy = metric(y_test, predicted)
     return accuracy
 
+def get_accuracy_label_predicted(y_test, predicted):
+    correct = sum(y == pred for y, pred in zip(y_test, predicted))
+    accuracy = correct/len(y_test)
+    return accuracy
 
 def get_mean(arr):
     _mean = np.mean(np.array(arr))
