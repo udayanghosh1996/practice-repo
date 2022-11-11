@@ -9,6 +9,7 @@ from poplib import CR
 from sklearn import datasets, svm, metrics, tree
 from itertools import product as pdt
 import numpy as np
+from joblib import dump, load
 
 from utils import (
     get_accuracy,
@@ -23,7 +24,7 @@ from utils import (
     get_mean,
     get_std,
 )
-from joblib import dump, load
+
 
 
 n = int(input("Enter the number of sets of train, dev, test split : "))
