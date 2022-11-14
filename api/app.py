@@ -33,6 +33,25 @@ def predict():
     return jsonify({'predicted': predict})
 
 
+@app.route('/prediction', methods = ['GET', 'POST'] )
+def prediction():
+    if model:
+        if request.get_json() is not None:
+            json_ = request.json
+            pred1 = model.predict([json_['image1']])
+            pred2 = model.predict([json_['image2']])
+            
+            if pred1 == pred2:
+                return jsonify({'Result':'Both images are same'})
+            else:
+                return jsonify({'Result':"Both images are different"})
+                                
+
+    else:
+        print ('No Model available')
+        return jsonify({'Error':'No model available please train the model'})
+
+
 if __name__ == '__main__':
   
-    app.run(debug = True)
+    app.run(host='0.0.0.0', port=8080, debug=True)
