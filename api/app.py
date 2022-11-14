@@ -35,6 +35,7 @@ def predict():
 
 @app.route('/prediction', methods = ['GET', 'POST'] )
 def prediction():
+
     if model:
         if request.get_json() is not None:
             json_ = request.json
