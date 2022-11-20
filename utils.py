@@ -39,16 +39,16 @@ def pred_image_viz(x_test, predictions):
 
 
 # random split generator
-def random_split_generator(num_sets):
+def random_split_generator( seed):
+    np.random.seed(seed)
     train = []
     dev = []
     test = []
-    for i in range(0,num_sets):
-        train_dev_test = np.array(np.random.random(3))
-        train_dev_test /= train_dev_test.sum()
-        train.append(train_dev_test[0])
-        dev.append(train_dev_test[1])
-        test.append(train_dev_test[2])
+    train_dev_test = np.array(np.random.random(3))
+    train_dev_test /= train_dev_test.sum()
+    train= train_dev_test[0]
+    dev = train_dev_test[1]
+    test = train_dev_test[2]
     return train, dev, test
 
 

@@ -1,0 +1,9 @@
+FROM ubuntu:latest
+FROM python:3.8.1
+COPY ./*.sh /experiment/
+COPY ./*.py /experiment/
+COPY ./requirements.txt /experiment/requirements.txt
+RUN pip3 install --no-cache-dir -r /experiment/requirements.txt
+WORKDIR /experiment
+EXPOSE 8080
+ENTRYPOINT ["/experiment/runbash.sh"]
