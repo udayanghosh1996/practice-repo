@@ -27,10 +27,11 @@ from utils import (
 
 
 
-n = int(input("Enter the number of sets of train, dev, test split : "))
+#n = int(input("Enter the number of sets of train, dev, test split : "))
+n = 1
+seed = 42
 
-
-train_fracs, dev_fracs, test_fracs = random_split_generator(n)
+train_fracs, dev_fracs, test_fracs = random_split_generator(seed)
 #print(train_frac,'\n', dev_frac, '\n', test_frac)
 
 # set the hyper parameters SVM

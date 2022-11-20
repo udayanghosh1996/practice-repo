@@ -1,7 +1,7 @@
 import sys
 sys.path.append('.')
 
-from utils import train_dev_test_split
+from utils import train_dev_test_split, random_split_generator
 from sklearn import datasets
 from joblib import dump, load
 
@@ -36,7 +36,57 @@ def test_predict_all_classes():
     predicted = list(set(predict))
     assert len(checker) == len(predicted)
 
+def test_same_seed_len():
+    digits = datasets.load_digits()
+    n_samples = len(digits.images)
+    print(" test in same seed value")
+    data = digits.images.reshape((n_samples, -1))
+    label = digits.target
+    num_sets = 1
+    seed1 = 42
+    seed2 = 42
+    train_fracs_1, dev_fracs_1, test_fracs_1 = random_split_generator(seed1)
+    train_fracs_2, dev_fracs_2, test_fracs_2 = random_split_generator(seed2)
+    x_train_1, y_train_1, x_dev_1, y_dev_1, x_test_1, y_test_1 = train_dev_test_split(
+        data, label, train_fracs_1, dev_fracs_1
+    )
+    x_train_2, y_train_2, x_dev_2, y_dev_2, x_test_2, y_test_2 = train_dev_test_split(
+        data, label, train_fracs_2, dev_fracs_2
+    )
+    flag = 1
+    if len(x_train_1) != len(x_train_2):
+        flag = 2
+    if len(x_dev_1) != len(x_dev_2):
+        flag = 2
+    if len(x_test_1) != len(x_test_2):
+        flag = 2
+    assert flag == 1
 
+def test_diff_seed_len():
+    digits = datasets.load_digits()
+    n_samples = len(digits.images)
+    print(" test in different seed value")
+    data = digits.images.reshape((n_samples, -1))
+    label = digits.target
+    num_sets = 1
+    seed1 = 42
+    seed2 = 124
+    train_fracs_1, dev_fracs_1, test_fracs_1 = random_split_generator(seed1)
+    train_fracs_2, dev_fracs_2, test_fracs_2 = random_split_generator(seed2)
+    x_train_1, y_train_1, x_dev_1, y_dev_1, x_test_1, y_test_1 = train_dev_test_split(
+        data, label, train_fracs_1, dev_fracs_1
+    )
+    x_train_2, y_train_2, x_dev_2, y_dev_2, x_test_2, y_test_2 = train_dev_test_split(
+        data, label, train_fracs_2, dev_fracs_2
+    )
+    flag = 1
+    if len(x_train_1) != len(x_train_2):
+        flag = 2
+    if len(x_dev_1) != len(x_dev_2):
+        flag = 2
+    if len(x_test_1) != len(x_test_2):
+        flag = 2
+    assert flag == 2
 
 
     
